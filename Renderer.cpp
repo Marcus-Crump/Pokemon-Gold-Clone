@@ -1,3 +1,4 @@
+#include "util.cpp"
 internal void
 clearScreen(unsigned int color) {
     unsigned int* pixel = (unsigned int*)renderState.memory;

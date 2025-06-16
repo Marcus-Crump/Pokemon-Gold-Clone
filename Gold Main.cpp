@@ -5,8 +5,8 @@
 #define internal static
 
 bool open = false;
-global_variable bool running = true;
-global_variable bool runGamrunGamee = false;
+global_variable bool playing = true;
+global_variable bool starting = true;
 
 struct RenderState {
     int height, width;
@@ -19,7 +19,6 @@ global_variable RenderState renderState;
 #include "platformCommon.cpp"
 #include "renderer.cpp"
 #include "Simulate Game.cpp"
-
 
 LRESULT CALLBACK window_callback(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     LRESULT result = 0;
@@ -76,15 +75,75 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
     float deltaT = 0.016666f;
     LARGE_INTEGER frameBeginTime;
     QueryPerformanceCounter(&frameBeginTime);
-
     float performanceFreq;
+    int path;
     {
         LARGE_INTEGER perf;
         QueryPerformanceFrequency(&perf);
         performanceFreq = (float)perf.QuadPart;
     }
+    //opening sequence
+    while (starting)
+    {
+        //Input
+        MSG message;
 
-    while (running) {
+        for (int i = 0; i<BUTTON_COUNT; i++) {
+            input.buttons[i].changed = false;
+        }
+
+        while (PeekMessage(&message, window, 0, 0, PM_REMOVE)) {
+
+            switch (message.message) {
+                case WM_KEYUP:
+                case WM_KEYDOWN: {
+                    u32 vk_code = (u32)message.wParam;
+                    bool isDown = ((message.lParam & (1 << 31)) == 0);
+
+#define processButton(b, vk)\
+case vk: {\
+input.buttons[b].changed = isDown != input.buttons[b].isDown;\
+input.buttons[b].isDown = isDown;\
+}break;
+                    switch (vk_code) {
+                        processButton(BUTTON_4, VK_NUMPAD4);
+                        processButton(BUTTON_5, VK_NUMPAD5);
+                        processButton(BUTTON_6, VK_NUMPAD6);
+                        processButton(BUTTON_7, VK_NUMPAD7);
+                        processButton(BUTTON_8, VK_NUMPAD8);
+                        processButton(BUTTON_9, VK_NUMPAD9);
+                        processButton(BUTTON_RETURN, VK_RETURN);
+                        processButton(BUTTON_Q, 0x51);
+                        processButton(BUTTON_W, 0x57);
+                        processButton(BUTTON_E, 0x45);
+                        processButton(BUTTON_A, 0x41);
+                        processButton(BUTTON_S, 0x53);
+                        processButton(BUTTON_D, 0x44);
+                        processButton(BUTTON_TAB, VK_TAB);
+
+
+                    }
+                }break;
+
+                default: {
+                    TranslateMessage(&message);
+                    DispatchMessage(&message);
+                }
+            }
+
+        }
+        
+        path = startingSequence(&input);
+
+        //Render
+        StretchDIBits(hdc, 0, 0, renderState.width, renderState.height, 0, 0, renderState.width, renderState.height, renderState.memory, &renderState.bitmapinfo, DIB_RGB_COLORS, SRCCOPY);
+
+        LARGE_INTEGER frameEndTime;
+        QueryPerformanceCounter(&frameEndTime);
+        frameBeginTime = frameEndTime;
+    }
+    
+    while (playing) {
         //Input
         MSG message;
 
@@ -133,18 +192,9 @@ input.buttons[b].isDown = isDown;\
 
         }
         //Simulate
-        clearScreen(0);
-	if(runGame) {
-		//game
-       	simulateGame(&input);
-	} else {
-		//menu
-	}
+        clearScreen(0xffffff);
 	
 
-
-
-        //renderBackground();
         //Render
         StretchDIBits(hdc, 0, 0, renderState.width, renderState.height, 0, 0, renderState.width, renderState.height, renderState.memory, &renderState.bitmapinfo, DIB_RGB_COLORS, SRCCOPY);
 

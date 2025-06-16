@@ -24,4 +24,4 @@ enum {
 
 struct Input {
     ButtonState buttons [BUTTON_COUNT];
-}
+};

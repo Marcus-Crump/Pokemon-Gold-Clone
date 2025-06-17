@@ -5,7 +5,7 @@
 #define internal static
 
 bool open = false;
-global_variable bool playing = true;
+global_variable bool running = true;
 global_variable bool starting = true;
 
 struct RenderState {
@@ -83,7 +83,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
         performanceFreq = (float)perf.QuadPart;
     }
     //opening sequence
-    while (starting)
+    /*while (starting)
     {
         //Input
         MSG message;
@@ -141,9 +141,9 @@ input.buttons[b].isDown = isDown;\
         LARGE_INTEGER frameEndTime;
         QueryPerformanceCounter(&frameEndTime);
         frameBeginTime = frameEndTime;
-    }
+    }*/
     
-    while (playing) {
+    while (running) {
         //Input
         MSG message;
 
@@ -193,7 +193,8 @@ input.buttons[b].isDown = isDown;\
         }
         //Simulate
         clearScreen(0xffffff);
-	
+        
+        simulateGame(&input);
 
         //Render
         StretchDIBits(hdc, 0, 0, renderState.width, renderState.height, 0, 0, renderState.width, renderState.height, renderState.memory, &renderState.bitmapinfo, DIB_RGB_COLORS, SRCCOPY);

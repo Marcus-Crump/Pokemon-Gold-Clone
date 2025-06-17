@@ -23,3 +23,21 @@ drawRectinPixels ( int x0, int y0, int x1, int y1, u32 color) {
     }
 }
 
+global_variable float renderScale = 0.01f;
+internal void 
+drawCell(int x, int y, int scale, u32 color) {
+    x *= renderState.height*renderScale;
+    y *= renderState.height*renderScale;
+    float pxhs = .5*renderState.height*renderScale;
+    float halfSizeY = .5*renderState.height*renderScale;
+
+    x += renderState.width / 2.f;
+    y += renderState.height/ 2.f;
+    //Change to pixels 
+    int x0 = x - pxhs;
+    int x1 = x + pxhs;
+    int y0 = y - pxhs;
+    int y1 = y + pxhs;
+    drawRectinPixels(x0, y0, x1, y1, color);
+}
+
